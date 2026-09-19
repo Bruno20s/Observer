@@ -1,0 +1,15 @@
+# Rastreador de Precos com IA (MVP) - Python 3.11+
+# Dependencias de runtime e de teste.
+
+# Scraping da Amazon (conteudo renderizado via JS)
+playwright>=1.40
+
+# Agendamento do job de monitoramento periodico
+schedule>=1.2
+
+# Cliente HTTP (API do Mercado Livre)
+httpx>=0.27
+
+# Testes
+pytest>=8.0
+hypothesis>=6.100

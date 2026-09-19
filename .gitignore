@@ -1,0 +1,33 @@
+# Credenciais e configuracao sensivel - nunca commitar
+.env
+
+# Banco de dados local (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Playwright
+/playwright-report/
+/test-results/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

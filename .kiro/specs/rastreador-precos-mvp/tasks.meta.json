@@ -1,0 +1,602 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Estruturar o projeto e as dependências": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652127422
+      },
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652148231
+      },
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652300463
+      }
+    ],
+    "2.1 Ler as 7 variáveis de ambiente obrigatórias, sem valores default embutidos, e validar presença/não-vazio na inicialização.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652128351
+      },
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652312578
+      },
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652555977
+      }
+    ],
+    "2.2 Escrever testes de validação de config (`tests/test_config.py`).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652129961
+      },
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652573820
+      }
+    ],
+    "3.1 Definir as entidades em `src/db/models.py` (Produto, ProdutoSite, HistoricoPreco, HistoricoReputacao) e o schema/migração inicial em `src/db/database.py` conforme o SQL do design (UNIQUE(site,item_id), preço como TEXT/Decimal, timestamps ISO-8601 UTC, índices por (produto_site_id, coletado_em)).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652130151
+      },
+      {
+        "executionId": "6832d2ca-4a64-4d44-b07f-105dbcfcecd1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652873861
+      },
+      {
+        "executionId": "6832d2ca-4a64-4d44-b07f-105dbcfcecd1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789653062153
+      }
+    ],
+    "3.2 Implementar acessores append-only: `inserir_historico_preco`, `inserir_historico_reputacao`, `obter_ultimo_preco` (maior `coletado_em`, desempate por maior `id`), `listar_produto_site`, `associar_produto`, `desassociar_produto`. Não expor update/delete de histórico.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652130371
+      },
+      {
+        "executionId": "6832d2ca-4a64-4d44-b07f-105dbcfcecd1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789653067587
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655272223
+      }
+    ],
+    "3.3 Escrever teste property-based de \"último preço por timestamp\" (Property 4).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652130509
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655283286
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655435899
+      }
+    ],
+    "3.4 Escrever teste property-based do invariante append-only (Property 5).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652130963
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655441924
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655593215
+      }
+    ],
+    "4.1 Implementar o enum `Site` e as dataclasses `ItemRef`, `PrecoResult`, `ReputacaoResult`, e a classe abstrata `BaseAdapter` (`parse_url` staticmethod, `buscar_preco`, `buscar_reputacao_vendedor`).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652131293
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655601493
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655889959
+      }
+    ],
+    "5.1 Implementar `MercadoLivre.parse_url` (regex `MLB\\d+`, domínios mercadolivre/mercadolibre, normaliza maiúsculas) e `Amazon.parse_url` (ASIN `[A-Z0-9]{10}` em `/dp/` ou `/gp/product/`). Retornar `None` quando não casar.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652131522
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655901995
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789656336216
+      }
+    ],
+    "5.2 Escrever teste property-based de round-trip de parsing (Property 1).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652131970
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789656340828
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789656436837
+      }
+    ],
+    "5.3 Escrever teste property-based de rejeição de URLs inválidas (Property 2).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652132796
+      },
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789656440942
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789668693612
+      }
+    ],
+    "6.1 Implementar a função de cadastro que roteia a URL para o `parse_url` correto por site, rejeita URL inválida/duplicada e persiste exatamente uma entrada ProdutoSite em sucesso (dedup via UNIQUE(site,item_id)).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652133096
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789668699872
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789668887795
+      }
+    ],
+    "6.2 Escrever teste property-based de idempotência/dedup do cadastro (Property 3).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652133284
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789668892429
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789669073251
+      }
+    ],
+    "7.1 Implementar o cliente OAuth2: chamadas autenticadas com Bearer token; ao detectar token expirado, renovar via `refresh_token` (`grant_type=refresh_token`) em até 30s e repetir a chamada; rotacionar o refresh token em memória; após 3 falhas de refresh, logar, sinalizar reautenticação manual observável e preservar a config.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652133731
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789669083691
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789669314332
+      }
+    ],
+    "7.2 Implementar `buscar_preco` (`GET /items/{item_id}` para título/seller_id + endpoint de preço de venda encapsulado em `_obter_preco_venda`) e `buscar_reputacao_vendedor` (`GET /users/{seller_id}` → mapear `level_id`, `power_seller_status`→selo, `transactions.ratings.negative`→% reclamações).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652134061
+      },
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789669321147
+      },
+      {
+        "executionId": "c4433640-b325-43ec-8af1-2531e4136446",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789694498089
+      }
+    ],
+    "7.3 Escrever testes (mockados) do adapter ML: parsing de resposta `/items` e `seller_reputation`, fluxo 401→refresh→retry, e falha de refresh 3x → sinal de reautenticação.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652134641
+      },
+      {
+        "executionId": "f30e86d5-847f-4709-9a09-78881f4b4ae4",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789684485058
+      },
+      {
+        "executionId": "f30e86d5-847f-4709-9a09-78881f4b4ae4",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789684813067
+      }
+    ],
+    "8.1 Implementar o gerador de atraso aleatório configurável (default 2–8s) e a estratégia de rate limiting/CAPTCHA (loga e desiste no ciclo, retornando `sucesso=False`; nunca insiste imediatamente).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652135220
+      },
+      {
+        "executionId": "f30e86d5-847f-4709-9a09-78881f4b4ae4",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789684818857
+      },
+      {
+        "executionId": "c4433640-b325-43ec-8af1-2531e4136446",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789694489199
+      }
+    ],
+    "8.2 Implementar `buscar_preco`/`buscar_reputacao_vendedor` via Playwright (headless), extraindo preço, nota média, número de avaliações e responsável pela venda/entrega; seletores centralizados; ausência de seletor → sinal indisponível (não crash).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652135506
+      },
+      {
+        "executionId": "c4433640-b325-43ec-8af1-2531e4136446",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789694505274
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699427235
+      }
+    ],
+    "8.3 Escrever teste property-based do atraso da Amazon (Property 12) e testes (mockados, Playwright mockado) de parsing de HTML e de bloqueio/CAPTCHA.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652135922
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699432549
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699677009
+      }
+    ],
+    "9.1 Implementar as fórmulas determinísticas por site (ML: nível/selo/reclamações; Amazon: nota/volume/vendedor) com `clamp` em [0,100]; retornar \"indisponivel\" quando um sinal obrigatório faltar. Coeficientes/mapeamentos em constantes.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652136110
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699684545
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699904786
+      }
+    ],
+    "9.2 Escrever teste property-based de bounds/indisponibilidade/determinismo do score (Property 9).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652136277
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699909719
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789700115532
+      }
+    ],
+    "10.1 Implementar `calcular_percentual` (((novo−anterior)/anterior)×100, 2 casas; rótulo subida/queda) e `montar_mensagem` (nome, preço anterior/novo, %, link; comparação entre sites quando ≥2 ProdutoSite; resumo de reputação ou \"reputação indisponível\").": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652136433
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789700122230
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789700323700
+      }
+    ],
+    "10.2 Implementar `enviar_notificacao` via CallMeBot (HTTP, timeout 15s, até 3 tentativas com backoff); em falha, logar com id do ProdutoSite e não bloquear (fallback local), sem reverter históricos.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652136675
+      },
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789700330283
+      }
+    ],
+    "10.3 Escrever teste property-based do percentual (Property 7) e teste property-based do conteúdo da mensagem (Property 8), mais teste (mockado) de falha do CallMeBot.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652136905
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789701314052
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789701593913
+      }
+    ],
+    "11.1 Implementar `detectar_mudanca` (comparação Decimal exata contra o último preço; sem anterior ou igual → sem mudança; diferente → mudança, subida ou queda).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652137355
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789701599179
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789701727751
+      }
+    ],
+    "11.2 Implementar `executar_ciclo`: iterar ProdutoSite; respeitar Intervalo_Minimo; consultar preço com timeout; tratar preço inválido (não compara/não notifica/preserva histórico); persistir HistoricoPreco; detectar mudança; buscar reputação + persistir HistoricoReputacao + calcular score; notificar só na mudança; isolar erros por item via try/except (uma falha não interrompe os demais).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652137698
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789701734583
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702067673
+      }
+    ],
+    "11.3 Escrever teste property-based de detecção de mudança (Property 6).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652137939
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702072954
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702411462
+      }
+    ],
+    "11.4 Escrever teste property-based de isolamento de erro (Property 10).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652138226
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702416034
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702614633
+      }
+    ],
+    "11.5 Escrever teste property-based do Intervalo_Minimo (Property 11).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652138460
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702619623
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702793570
+      }
+    ],
+    "11.6 Escrever testes de exemplo/integração: roteamento de adapter por site (3.1), timeout de consulta (3.6), transições de agrupamento single-site↔multi-site (2.1, 2.2, 2.4, 2.6).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652138754
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789702799761
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703085054
+      }
+    ],
+    "12.1 Registrar `executar_ciclo` no `schedule` com a frequência configurável (default 4h) e criar o entrypoint da aplicação que valida a config na inicialização e inicia o loop do agendador.": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652139031
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703091516
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703577022
+      }
+    ],
+    "12.2 Escrever teste de registro do job no scheduler (mockado; sem sleep real).": [
+      {
+        "executionId": "19ee20f3-7229-4b83-a5db-815b8c59f429",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789652139200
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703584598
+      },
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703791638
+      }
+    ],
+    "3. Implementar a camada de dados SQLite (`src/db/`)": [
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655593389
+      }
+    ],
+    "4. Definir a interface comum de adapter (`src/adapters/base.py`)": [
+      {
+        "executionId": "a5721d6b-850c-4a7a-ac4c-76d0d0e500b1",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789655890126
+      }
+    ],
+    "5. Implementar o parsing de URL nos adapters": [
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789668693733
+      }
+    ],
+    "6. Implementar o cadastro de produto (registration)": [
+      {
+        "executionId": "fbb40fc3-4d88-47a8-afe2-e61f86e7f90e",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789669073349
+      }
+    ],
+    "7. Implementar o Adapter Mercado Livre (`src/adapters/mercado_livre.py`)": [
+      {
+        "executionId": "c4433640-b325-43ec-8af1-2531e4136446",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789694498438
+      }
+    ],
+    "8. Implementar o Adapter Amazon (`src/adapters/amazon.py`)": [
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789699677101
+      }
+    ],
+    "9. Implementar o score de confiança (`src/confianca/score.py`)": [
+      {
+        "executionId": "8d7c74d8-b475-45bc-ba7d-9fe7ccdbf779",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789700115873
+      }
+    ],
+    "11. Implementar a orquestração do Job_Monitor (`src/jobs/monitor.py`)": [
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703085229
+      }
+    ],
+    "12. Conectar o agendador e o entrypoint": [
+      {
+        "executionId": "610ccb3e-e747-4172-818c-f85398cd340d",
+        "chatSessionId": "sess_dd429f63-5851-4701-af8d-ab939ed61797",
+        "timestamp": 1789703791925
+      }
+    ]
+  }
+}
