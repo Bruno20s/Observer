@@ -40,6 +40,8 @@ from typing import Callable, Mapping, Optional
 
 import schedule
 
+from pathlib import Path
+
 from src.adapters.amazon import Amazon
 from src.adapters.base import BaseAdapter, Site
 from src.adapters.mercado_livre import MercadoLivre
@@ -54,6 +56,11 @@ logger = logging.getLogger(__name__)
 #: (VPS/Raspberry Pi); um arquivo no diretorio de execucao e suficiente para o
 #: MVP. Pode ser sobrescrito ao chamar :func:`main`/:func:`inicializar_app`.
 DEFAULT_DB_PATH = "rastreador.db"
+
+#: Caminho padrao do arquivo .env. Resolvido a partir da localizacao
+#: deste modulo (raiz do projeto = pai de ``src/``), para funcionar
+#: independentemente do diretorio de trabalho de onde o comando e rodado.
+DEFAULT_DOTENV_PATH = str(Path(__file__).resolve().parent.parent / ".env")
 
 #: Intervalo (em segundos) entre iteracoes do loop do agendador. O
 #: ``schedule.run_pending()`` decide quando o job realmente roda; este sleep
@@ -193,6 +200,7 @@ def loop_agendador(
 def inicializar_app(
     *,
     db_path: str = DEFAULT_DB_PATH,
+    dotenv_path: str = DEFAULT_DOTENV_PATH,
     scheduler: Optional[schedule.Scheduler] = None,
 ) -> tuple[schedule.Scheduler, object, Config]:
     """Valida a config, inicializa o banco, monta adapters e registra o job.
@@ -215,7 +223,7 @@ def inicializar_app(
     """
     # 1. Valida a config na inicializacao (R7.3). ConfigError aborta o startup.
     try:
-        config = carregar_config()
+        config = carregar_config(dotenv_path=dotenv_path)
     except ConfigError:
         logger.error(
             "Inicializacao abortada: configuracao invalida (ver log acima "
