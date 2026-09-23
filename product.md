@@ -45,6 +45,33 @@ calculando preço médio de mercado e sinalizando anúncios muito abaixo da méd
 como possível oportunidade ou possível golpe. Este modo deve reaproveitar a
 mesma infraestrutura de banco de dados e notificação do MVP.
 
+### Marketplaces de veículos (ex: Webmotors) — desejado, porém complexo
+Incluir monitoramento de veículos (Webmotors e similares) é um objetivo
+desejado, registrado aqui como evolução futura de maior esforço. A avaliação
+de viabilidade (feita durante o MVP) apontou os seguintes desafios, que
+precisam ser resolvidos antes de implementar:
+
+- **Sem API pública de leitura de mercado.** A Webmotors possui um Portal do
+  Desenvolvedor (via Sensedia), mas todas as APIs são voltadas ao LOJISTA
+  (publicar/gerenciar o próprio estoque, receber leads) e exigem contrato
+  comercial. Nenhuma delas permite consultar preços de anúncios de terceiros.
+  Portanto, ao contrário do Mercado Livre (API oficial de leitura), aqui não
+  há caminho oficial para obter os dados de mercado.
+- **Só resta scraping**, com a mesma fragilidade e risco de bloqueio já
+  identificados para outros sites sem API (ex: Shopee): proteção anti-bot,
+  seletores que quebram quando o layout muda, e necessidade de manutenção
+  contínua.
+- **Itens únicos, não catálogo.** Um carro usado é único (quilometragem, ano,
+  estado, opcionais). "Monitorar o preço" muda de significado: em vez de
+  comparar o mesmo item entre vendedores, é preciso definir se o alvo é um
+  anúncio específico (que some quando o carro é vendido) ou o preço médio de
+  um modelo (que exige coletar e normalizar muitos anúncios).
+
+Por essas razões, a Webmotors encaixa-se melhor no modo "caçador de
+pechincha" acima (preço médio de mercado + deteccão de oportunidade), e não
+como um adapter simples de preço à vista. Fica planejada para quando esse
+modo for desenvolvido, reaproveitando a infraestrutura de banco e notificação.
+
 ## Critérios de sucesso
 - O sistema roda de forma autônoma (job agendado) sem intervenção manual diária.
 - Uma mudança real de preço em qualquer produto monitorado gera uma notificação

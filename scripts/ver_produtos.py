@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -48,12 +49,39 @@ def _fmt_preco(valor: str | None, moeda: str = "BRL") -> str:
     return f"{simbolo} {dec:.2f}".strip()
 
 
+def _rotulo_fuso() -> str:
+    """Rotulo curto do fuso local, no formato 'horario local UTC-03'.
+
+    Deixa explicito que os horarios exibidos foram convertidos de UTC (como o
+    banco grava) para o fuso local de quem executa o script. Usa o offset
+    numerico (ex.: -0300 -> UTC-03) por ser curto e inequivoco, evitando o
+    nome longo do fuso que alguns sistemas retornam.
+    """
+    offset = datetime.now().astimezone().strftime("%z")  # ex.: '-0300'
+    if not offset:
+        return "horario local"
+    return f"horario local UTC{offset[:3]}"  # ex.: 'horario local UTC-03'
+
+
 def _fmt_data(iso: str | None) -> str:
-    """Encurta um timestamp ISO para 'AAAA-MM-DD HH:MM' (UTC)."""
+    """Formata um timestamp ISO (gravado em UTC) no HORARIO LOCAL da maquina.
+
+    O banco grava timestamps em UTC (ISO-8601). Aqui convertemos para o fuso
+    local de quem executa o script, exibindo 'AAAA-MM-DD HH:MM'. Timestamps
+    sem informacao de fuso sao assumidos como UTC (convencao do sistema).
+    """
     if not iso:
         return "-"
-    texto = str(iso).replace("T", " ")
-    return texto[:16]
+    try:
+        dt = datetime.fromisoformat(str(iso))
+    except (ValueError, TypeError):
+        # Formato inesperado: devolve o texto cru (truncado), sem quebrar.
+        return str(iso).replace("T", " ")[:16]
+    if dt.tzinfo is None:
+        # Sem fuso -> assume UTC (o sistema sempre grava em UTC).
+        dt = dt.replace(tzinfo=timezone.utc)
+    local = dt.astimezone()  # converte para o fuso local da maquina
+    return local.strftime("%Y-%m-%d %H:%M")
 
 
 def _variacao(anterior: str | None, novo: str | None) -> str:
@@ -144,7 +172,7 @@ def main() -> None:
             # historico[0] e a leitura mais recente.
             atual = historico[0]
             print(f"   ultimo preco: {_fmt_preco(atual['preco'], atual['moeda'])}"
-                  f"   em {_fmt_data(atual['coletado_em'])} (UTC)")
+                  f"   em {_fmt_data(atual['coletado_em'])} ({_rotulo_fuso()})")
 
             rep = _ultima_reputacao(conn, ps.id)
             if rep is not None:

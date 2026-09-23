@@ -202,7 +202,7 @@ def inicializar_app(
     db_path: str = DEFAULT_DB_PATH,
     dotenv_path: str = DEFAULT_DOTENV_PATH,
     scheduler: Optional[schedule.Scheduler] = None,
-) -> tuple[schedule.Scheduler, object, Config]:
+) -> tuple[schedule.Scheduler, object, Config, Callable[[], None]]:
     """Valida a config, inicializa o banco, monta adapters e registra o job.
 
     Executa toda a sequencia de startup **sem** entrar no loop do agendador,
@@ -216,7 +216,11 @@ def inicializar_app(
         scheduler: ``schedule.Scheduler`` a usar; se ``None``, cria um novo.
 
     Returns:
-        Tupla ``(scheduler, conn, config)`` com o job ja registrado.
+        Tupla ``(scheduler, conn, config, job)`` com o job ja registrado.
+        O ``job`` (callable sem argumentos) e o mesmo registrado no
+        agendador; e devolvido para permitir executar um ciclo imediato ao
+        iniciar (ver :func:`main`), reutilizando a mesma logica e o mesmo
+        tratamento de erro do ciclo agendado.
 
     Raises:
         ConfigError: quando a validacao da config falha (R7.3).
@@ -242,13 +246,14 @@ def inicializar_app(
     job = criar_job_ciclo(conn, config, adapters)
     registrar_job(scheduler, job, config.parametros.frequencia_job_segundos)
 
-    return scheduler, conn, config
+    return scheduler, conn, config, job
 
 
 def main(
     *,
     db_path: str = DEFAULT_DB_PATH,
     intervalo_loop_segundos: float = DEFAULT_INTERVALO_LOOP_SEGUNDOS,
+    executar_ao_iniciar: bool = True,
 ) -> None:
     """Ponto de entrada da aplicacao: startup + loop do agendador.
 
@@ -259,17 +264,28 @@ def main(
     Args:
         db_path: caminho do arquivo SQLite (default :data:`DEFAULT_DB_PATH`).
         intervalo_loop_segundos: espera entre verificacoes do agendador.
+        executar_ao_iniciar: quando ``True`` (default), roda UM ciclo
+            imediatamente ao iniciar, antes de entrar no loop, e so entao
+            passa a respeitar o intervalo de 4h. Util porque o notebook e
+            ligado/desligado: ao subir o sistema, ele ja verifica na hora em
+            vez de esperar o primeiro intervalo do agendador.
     """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
-    scheduler, _conn, config = inicializar_app(db_path=db_path)
+    scheduler, _conn, config, job = inicializar_app(db_path=db_path)
     logger.info(
         "Rastreador de Precos iniciado; Job_Monitor a cada %ss. Aguardando o "
         "agendador (Ctrl+C para sair).",
         config.parametros.frequencia_job_segundos,
     )
+    # Ciclo imediato ao iniciar (R3 na pratica): ao ligar o sistema, verifica
+    # agora em vez de esperar o primeiro intervalo do agendador. Usa o mesmo
+    # job registrado (que ja isola erros e nunca derruba o processo).
+    if executar_ao_iniciar:
+        logger.info("Executando verificacao inicial ao iniciar...")
+        job()
     loop_agendador(scheduler, intervalo_loop_segundos=intervalo_loop_segundos)
 
 
