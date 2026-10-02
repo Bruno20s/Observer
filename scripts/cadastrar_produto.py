@@ -50,16 +50,19 @@ def _listar(conn) -> None:
     print(f"{len(entradas)} ProdutoSite cadastrado(s):")
     for ps in entradas:
         grupo = f" [produto_id={ps.produto_id}]" if ps.produto_id is not None else ""
+        destino = ps.email_destino or "(padrao do .env)"
         print(f"  #{ps.id}  {ps.site}  {ps.item_id}{grupo}")
         print(f"        {ps.url_original}")
+        print(f"        notifica: {destino}")
 
 
-def _cadastrar_uma(conn, url: str) -> bool:
-    """Cadastra uma URL. Retorna True se persistiu uma nova entrada."""
-    resultado = cadastrar_produto(conn, url)
+def _cadastrar_uma(conn, url: str, email=None) -> bool:
+    """Cadastra uma URL (com e-mail de destino opcional). True se persistiu."""
+    resultado = cadastrar_produto(conn, url, email_destino=email)
     if resultado.status is StatusCadastro.SUCESSO:
         ps = resultado.produto_site
-        print(f"[OK] cadastrado: {ps.site} / {ps.item_id} (#{ps.id})")
+        destino = ps.email_destino or "(padrao do .env)"
+        print(f"[OK] cadastrado: {ps.site} / {ps.item_id} (#{ps.id}) -> {destino}")
         return True
     if resultado.status is StatusCadastro.DUPLICADO:
         print(f"[JA EXISTE] {resultado.mensagem}")
@@ -76,6 +79,11 @@ def main() -> None:
     )
     parser.add_argument("urls", nargs="*", help="URLs de anuncios a cadastrar.")
     parser.add_argument("--db", default=DB_PADRAO, help="Caminho do banco SQLite.")
+    parser.add_argument(
+        "--email", default=None,
+        help="E-mail de destino das notificacoes destes produtos (opcional; "
+             "sem isso, usa o EMAIL_DESTINATARIO do .env).",
+    )
     parser.add_argument(
         "--listar", action="store_true",
         help="Apenas listar os ProdutoSite ja cadastrados e sair.",
@@ -107,7 +115,7 @@ def main() -> None:
 
         novos = 0
         for url in urls:
-            if _cadastrar_uma(conn, url):
+            if _cadastrar_uma(conn, url, args.email):
                 novos += 1
 
         print(f"\nConcluido: {novos} novo(s) cadastrado(s) de {len(urls)} URL(s).\n")

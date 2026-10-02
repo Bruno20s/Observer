@@ -120,6 +120,100 @@ def test_loop_agendador_nao_dispara_job_nao_due() -> None:
     assert chamadas["n"] == 0
 
 
+def test_loop_agendador_guard_dispara_apos_intervalo_vencido() -> None:
+    """O guard (relogio de parede) dispara quando a ultima coleta e antiga.
+
+    Simula a maquina "acordando" apos dormir: a ultima coleta no banco foi ha 5h
+    (> frequencia de 4h) e ``agora`` e o instante atual. O job deve disparar
+    mesmo que o ``schedule`` (sem job "due") nao dispararia. Robustez a
+    suspensao — usa relogio de parede, imune ao clock monotonico congelar no
+    sono do Windows.
+    """
+    from datetime import timezone
+
+    scheduler = schedule.Scheduler()
+    chamadas = {"n": 0}
+
+    def _job() -> None:
+        chamadas["n"] += 1
+
+    agora = datetime(2026, 9, 25, 19, 0, 0, tzinfo=timezone.utc)
+    ultima = agora - timedelta(hours=5)  # coletado ha 5h -> intervalo vencido
+
+    iteracoes = {"n": 0}
+
+    def _continuar() -> bool:
+        iteracoes["n"] += 1
+        return iteracoes["n"] <= 1
+
+    main.loop_agendador(
+        scheduler,
+        sleep=lambda _s: None,
+        continuar=_continuar,
+        job=_job,
+        frequencia_job_segundos=DEFAULT_FREQUENCIA_JOB_SEGUNDOS,
+        ultima_coleta_utc=lambda: ultima,
+        agora_utc=lambda: agora,
+    )
+
+    assert chamadas["n"] == 1
+
+
+def test_loop_agendador_guard_dispara_quando_nao_ha_coleta() -> None:
+    """Sem nenhuma coleta no banco (``None``), o guard dispara o ciclo."""
+    scheduler = schedule.Scheduler()
+    chamadas = {"n": 0}
+
+    iteracoes = {"n": 0}
+
+    def _continuar() -> bool:
+        iteracoes["n"] += 1
+        return iteracoes["n"] <= 1
+
+    main.loop_agendador(
+        scheduler,
+        sleep=lambda _s: None,
+        continuar=_continuar,
+        job=lambda: chamadas.__setitem__("n", chamadas["n"] + 1),
+        frequencia_job_segundos=DEFAULT_FREQUENCIA_JOB_SEGUNDOS,
+        ultima_coleta_utc=lambda: None,
+    )
+
+    assert chamadas["n"] == 1
+
+
+def test_loop_agendador_guard_nao_dispara_antes_do_intervalo() -> None:
+    """O guard NAO dispara quando a ultima coleta e recente (intervalo vigente)."""
+    from datetime import timezone
+
+    scheduler = schedule.Scheduler()
+    chamadas = {"n": 0}
+
+    def _job() -> None:
+        chamadas["n"] += 1
+
+    agora = datetime(2026, 9, 25, 19, 0, 0, tzinfo=timezone.utc)
+    ultima = agora - timedelta(minutes=5)  # coletado ha 5min -> ainda vigente
+
+    iteracoes = {"n": 0}
+
+    def _continuar() -> bool:
+        iteracoes["n"] += 1
+        return iteracoes["n"] <= 2
+
+    main.loop_agendador(
+        scheduler,
+        sleep=lambda _s: None,
+        continuar=_continuar,
+        job=_job,
+        frequencia_job_segundos=DEFAULT_FREQUENCIA_JOB_SEGUNDOS,
+        ultima_coleta_utc=lambda: ultima,
+        agora_utc=lambda: agora,
+    )
+
+    assert chamadas["n"] == 0
+
+
 # ===========================================================================
 # 3. criar_job_ciclo isola excecao do ciclo (guarda de topo)
 # ===========================================================================

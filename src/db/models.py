@@ -65,6 +65,9 @@ class ProdutoSite:
     criado_em: str
     #: FK para :class:`Produto`; ``None`` quando single-site (sem agrupamento).
     produto_id: Optional[int] = None
+    #: E-mail de destino das notificacoes deste produto. ``None`` = usar o
+    #: ``EMAIL_DESTINATARIO`` padrao do ``.env`` (fallback no Job_Monitor).
+    email_destino: Optional[str] = None
     #: Chave primaria; ``None`` antes da persistencia.
     id: Optional[int] = None
 

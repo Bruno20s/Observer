@@ -60,6 +60,7 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
         item_id       TEXT NOT NULL,                   -- MLB... ou ASIN
         url_original  TEXT NOT NULL,
         criado_em     TEXT NOT NULL,                   -- ISO-8601 UTC
+        email_destino TEXT,                            -- destino da notificacao; NULL = usa EMAIL_DESTINATARIO
         UNIQUE (site, item_id)                         -- impede duplicata (R1.5)
     )
     """,
@@ -137,6 +138,20 @@ def criar_schema(conn: sqlite3.Connection) -> None:
     with conn:  # transaciona: commit ao final se nao houver excecao
         for statement in SCHEMA_STATEMENTS:
             conn.execute(statement)
+        _migrar_email_destino(conn)
+
+
+def _migrar_email_destino(conn: sqlite3.Connection) -> None:
+    """Migracao idempotente: garante a coluna ``email_destino`` em ``produto_site``.
+
+    Bancos criados antes desta feature nao tem a coluna. ``ALTER TABLE ... ADD
+    COLUMN`` a acrescenta preservando os dados existentes (as linhas antigas
+    ficam com ``NULL``, tratado como "usar o EMAIL_DESTINATARIO padrao"). E
+    seguro rodar sempre: se a coluna ja existe, ignoramos o erro.
+    """
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(produto_site)").fetchall()}
+    if "email_destino" not in cols:
+        conn.execute("ALTER TABLE produto_site ADD COLUMN email_destino TEXT")
 
 
 def inicializar_banco(caminho: Union[str, Path] = IN_MEMORY) -> sqlite3.Connection:
@@ -204,6 +219,7 @@ def _linha_para_produto_site(row: sqlite3.Row) -> ProdutoSite:
         item_id=row["item_id"],
         url_original=row["url_original"],
         criado_em=row["criado_em"],
+        email_destino=row["email_destino"],
     )
 
 
@@ -334,8 +350,8 @@ def inserir_produto_site(
             cursor = conn.execute(
                 """
                 INSERT INTO produto_site
-                    (produto_id, site, item_id, url_original, criado_em)
-                VALUES (?, ?, ?, ?, ?)
+                    (produto_id, site, item_id, url_original, criado_em, email_destino)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     produto_site.produto_id,
@@ -343,6 +359,7 @@ def inserir_produto_site(
                     produto_site.item_id,
                     produto_site.url_original,
                     produto_site.criado_em,
+                    produto_site.email_destino,
                 ),
             )
     except sqlite3.IntegrityError:
@@ -355,6 +372,7 @@ def inserir_produto_site(
         item_id=produto_site.item_id,
         url_original=produto_site.url_original,
         criado_em=produto_site.criado_em,
+        email_destino=produto_site.email_destino,
     )
 
 
@@ -389,6 +407,29 @@ def obter_ultimo_preco(
     return None if row is None else _linha_para_historico_preco(row)
 
 
+def obter_ultima_coleta(conn: sqlite3.Connection) -> Optional[str]:
+    """Retorna o ``coletado_em`` mais recente entre TODAS as coletas de preco.
+
+    Usado como fonte de verdade persistida para o guard robusto a suspensao no
+    loop do agendador (``src/main.py``): comparando este timestamp (relogio de
+    parede) com o instante atual, detecta-se se o intervalo entre ciclos ja
+    venceu, mesmo que a maquina tenha dormido (quando contadores monotonicos nao
+    contam o tempo suspenso).
+
+    Args:
+        conn: Conexao SQLite aberta.
+
+    Returns:
+        A string ISO-8601 UTC da coleta mais recente, ou ``None`` se ainda nao
+        houver nenhum registro de preco.
+    """
+    row = conn.execute(
+        "SELECT coletado_em FROM historico_preco "
+        "ORDER BY coletado_em DESC, id DESC LIMIT 1"
+    ).fetchone()
+    return None if row is None else row["coletado_em"]
+
+
 def listar_produto_site(conn: sqlite3.Connection) -> list[ProdutoSite]:
     """Lista todas as entradas :class:`ProdutoSite` cadastradas.
 
@@ -403,7 +444,7 @@ def listar_produto_site(conn: sqlite3.Connection) -> list[ProdutoSite]:
     """
     rows = conn.execute(
         """
-        SELECT id, produto_id, site, item_id, url_original, criado_em
+        SELECT id, produto_id, site, item_id, url_original, criado_em, email_destino
         FROM produto_site
         ORDER BY id
         """
@@ -428,6 +469,28 @@ def associar_produto(
         conn.execute(
             "UPDATE produto_site SET produto_id = ? WHERE id = ?",
             (produto_id, produto_site_id),
+        )
+
+
+def definir_email_destino(
+    conn: sqlite3.Connection, produto_site_id: int, email: Optional[str]
+) -> None:
+    """Define (ou limpa) o e-mail de destino de notificacao de um ProdutoSite.
+
+    Passar um e-mail associa as notificacoes daquele produto a esse endereco;
+    passar ``None`` limpa o destino especifico, fazendo o produto voltar a usar
+    o ``EMAIL_DESTINATARIO`` padrao do ``.env``. Altera apenas a coluna
+    ``email_destino``; nao toca em nenhum historico (append-only preservado).
+
+    Args:
+        conn: Conexao SQLite aberta.
+        produto_site_id: Identificador do ProdutoSite.
+        email: E-mail de destino, ou ``None`` para usar o padrao.
+    """
+    with conn:
+        conn.execute(
+            "UPDATE produto_site SET email_destino = ? WHERE id = ?",
+            (email, produto_site_id),
         )
 
 

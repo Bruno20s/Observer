@@ -406,7 +406,10 @@ def _processar_item(
 
     remetente_email = getattr(credenciais, "email_remetente", "")
     senha_app = getattr(credenciais, "email_senha_app", "")
-    destinatario = getattr(credenciais, "email_destinatario", "")
+    # Destino por produto (R5): usa o email_destino do ProdutoSite quando
+    # definido; caso contrario, cai no EMAIL_DESTINATARIO padrao do .env.
+    padrao = getattr(credenciais, "email_destinatario", "")
+    destinatario = produto_site.email_destino or padrao
     resultado_envio = remetente(
         mensagem,
         remetente_email,

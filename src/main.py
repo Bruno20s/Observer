@@ -40,6 +40,7 @@ from typing import Callable, Mapping, Optional
 
 import schedule
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 from src.adapters.amazon import Amazon
@@ -66,6 +67,20 @@ DEFAULT_DOTENV_PATH = str(Path(__file__).resolve().parent.parent / ".env")
 #: ``schedule.run_pending()`` decide quando o job realmente roda; este sleep
 #: apenas evita busy-wait. Mantido pequeno para responsividade.
 DEFAULT_INTERVALO_LOOP_SEGUNDOS = 1.0
+
+
+def _agora_utc() -> datetime:
+    """Relogio de parede padrao: instante corrente em UTC (timezone-aware)."""
+    return datetime.now(timezone.utc)
+
+
+def _parse_iso_utc(texto: str) -> datetime:
+    """Converte um timestamp ISO-8601 (como gravado em ``coletado_em``) em
+    ``datetime`` UTC-aware. Texto "naive" (sem tz) e assumido como UTC."""
+    dt = datetime.fromisoformat(texto)
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 def construir_adapters(config: Config) -> dict[Site, BaseAdapter]:
@@ -176,14 +191,35 @@ def loop_agendador(
     intervalo_loop_segundos: float = DEFAULT_INTERVALO_LOOP_SEGUNDOS,
     sleep: Callable[[float], None] = time.sleep,
     continuar: Callable[[], bool] = lambda: True,
+    job: Optional[Callable[[], None]] = None,
+    frequencia_job_segundos: Optional[float] = None,
+    ultima_coleta_utc: Optional[Callable[[], Optional[datetime]]] = None,
+    agora_utc: Callable[[], datetime] = _agora_utc,
 ) -> None:
     """Executa o laco do agendador: ``run_pending`` + ``sleep`` (R3.5).
 
+    Alem de delegar ao ``schedule`` (``run_pending``), este laco faz uma
+    verificacao baseada no **relogio de parede** (UTC) comparado ao **timestamp
+    da ultima coleta gravada no banco**, para ser robusto a
+    suspensao/hibernacao da maquina.
+
+    Por que relogio de parede (e nao um contador monotonico): quando o notebook
+    dorme, o processo Python congela e o ``schedule`` **nao recupera** os ciclos
+    perdidos. Um contador monotonico tampouco resolve no Windows, porque o clock
+    monotonico ("unbiased") NAO conta o tempo em suspensao/hibernacao — ao
+    acordar, ele acha que quase nenhum tempo passou. Ja o relogio de parede
+    (UTC) permanece correto ao despertar; comparando-o com o ``coletado_em`` da
+    ultima coleta (fonte de verdade persistida), detectamos com seguranca que o
+    intervalo ja passou e disparamos o ciclo na hora.
+
+    Disparar um ciclo "a mais" e seguro: ``executar_ciclo`` respeita o
+    ``Intervalo_Minimo`` por item, entao um produto consultado ha pouco e apenas
+    pulado, sem consulta redundante.
+
     Separado de :func:`registrar_job` para que o registro possa ser testado sem
-    entrar num laco infinito. ``sleep`` e ``continuar`` sao injetaveis: por
-    padrao o laco roda indefinidamente com ``time.sleep``; nos testes pode-se
-    passar um ``continuar`` que retorna ``False`` apos N iteracoes e um ``sleep``
-    no-op para nunca dormir de verdade.
+    entrar num laco infinito. Os seams (``sleep``, ``continuar``,
+    ``ultima_coleta_utc``, ``agora_utc``) sao injetaveis para testar sem tempo
+    real, banco real ou loop infinito.
 
     Args:
         scheduler: instancia de ``schedule.Scheduler`` com o job ja registrado.
@@ -191,9 +227,44 @@ def loop_agendador(
         sleep: seam de espera injetavel (default ``time.sleep``).
         continuar: predicado avaliado a cada iteracao; enquanto ``True``, o laco
             segue. Default: sempre ``True`` (loop infinito em producao).
+        job: callable do ciclo (mesmo registrado no ``schedule``). Quando
+            fornecido junto de ``frequencia_job_segundos`` e ``ultima_coleta_utc``,
+            ativa o guard robusto a suspensao. Se ``None``, o laco se comporta
+            como antes (apenas ``schedule``).
+        frequencia_job_segundos: intervalo alvo entre execucoes do ``job``, em
+            segundos. Necessario para o guard.
+        ultima_coleta_utc: callable ``() -> Optional[datetime]`` que retorna o
+            ``coletado_em`` (UTC-aware) da coleta mais recente no banco, ou
+            ``None`` quando nao ha nenhuma. Necessario para o guard; injetavel
+            nos testes.
+        agora_utc: relogio de parede injetavel ``() -> datetime`` (UTC-aware).
+            Default: ``datetime.now(UTC)``.
     """
+    guard_ativo = (
+        job is not None
+        and frequencia_job_segundos is not None
+        and ultima_coleta_utc is not None
+    )
+
     while continuar():
         scheduler.run_pending()
+
+        if guard_ativo:
+            ultima = ultima_coleta_utc()
+            disparar = ultima is None
+            if not disparar:
+                decorrido = (agora_utc() - ultima).total_seconds()
+                disparar = decorrido >= frequencia_job_segundos
+            if disparar:
+                logger.info(
+                    "Guard (relogio de parede): coletado_em mais recente = %s; "
+                    "intervalo de %.0fs vencido, disparando ciclo (robusto a "
+                    "suspensao).",
+                    ultima.isoformat() if ultima is not None else "nenhum",
+                    frequencia_job_segundos,
+                )
+                job()
+
         sleep(intervalo_loop_segundos)
 
 
@@ -274,7 +345,7 @@ def main(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
-    scheduler, _conn, config, job = inicializar_app(db_path=db_path)
+    scheduler, conn, config, job = inicializar_app(db_path=db_path)
     logger.info(
         "Rastreador de Precos iniciado; Job_Monitor a cada %ss. Aguardando o "
         "agendador (Ctrl+C para sair).",
@@ -286,7 +357,28 @@ def main(
     if executar_ao_iniciar:
         logger.info("Executando verificacao inicial ao iniciar...")
         job()
-    loop_agendador(scheduler, intervalo_loop_segundos=intervalo_loop_segundos)
+    # Ativa o guard robusto a suspensao/hibernacao: compara o relogio de parede
+    # (UTC) com o coletado_em da ultima coleta no banco. Se a maquina dormir, ao
+    # acordar o ciclo dispara assim que o loop detectar que o intervalo venceu,
+    # sem depender do ``schedule`` recuperar os ciclos perdidos e sem sofrer com
+    # o clock monotonico do Windows nao contar o tempo suspenso.
+    def _ultima_coleta_utc() -> Optional[datetime]:
+        bruto = database.obter_ultima_coleta(conn)
+        if bruto is None:
+            return None
+        try:
+            return _parse_iso_utc(bruto)
+        except (ValueError, TypeError):
+            # Timestamp ilegivel: trata como "sem coleta" para nao travar o guard.
+            return None
+
+    loop_agendador(
+        scheduler,
+        intervalo_loop_segundos=intervalo_loop_segundos,
+        job=job,
+        frequencia_job_segundos=config.parametros.frequencia_job_segundos,
+        ultima_coleta_utc=_ultima_coleta_utc,
+    )
 
 
 if __name__ == "__main__":

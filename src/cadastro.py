@@ -90,6 +90,7 @@ def _rotear_url(
 def cadastrar_produto(
     conn: sqlite3.Connection,
     url: str,
+    email_destino: Optional[str] = None,
     adapters: Sequence[type[BaseAdapter]] = _ADAPTERS,
 ) -> ResultadoCadastro:
     """Cadastra um produto a partir da URL de um anuncio (R1).
@@ -101,6 +102,10 @@ def cadastrar_produto(
     Args:
         conn: Conexao SQLite aberta (schema ja criado).
         url: URL do anuncio informada pelo usuario.
+        email_destino: E-mail que recebera as notificacoes deste produto.
+            Se ``None``, o produto usa o ``EMAIL_DESTINATARIO`` padrao do
+            ``.env`` (fallback no Job_Monitor). Deve conter ``@`` quando
+            informado.
         adapters: Adapters candidatos para o roteamento; por padrao Mercado
             Livre e Amazon. Injetavel para testes.
 
@@ -119,11 +124,26 @@ def cadastrar_produto(
             ),
         )
 
+    # Validacao leve do e-mail (sanidade de formato): quando informado, deve
+    # ter um '@' com partes nao vazias. Evita erro so descoberto no envio.
+    if email_destino is not None:
+        email_destino = email_destino.strip()
+        partes = email_destino.split('@')
+        if len(partes) != 2 or not partes[0] or not partes[1]:
+            return ResultadoCadastro(
+                status=StatusCadastro.URL_INVALIDA,
+                mensagem=(
+                    f"E-mail de destino invalido: {email_destino!r} "
+                    "(esperado formato usuario@dominio)."
+                ),
+            )
+
     novo = ProdutoSite(
         site=ref.site.value,
         item_id=ref.item_id,
         url_original=ref.url_original,
         criado_em=datetime.now(timezone.utc).isoformat(),
+        email_destino=email_destino,
     )
     persistido = database.inserir_produto_site(conn, novo)
     if persistido is None:
